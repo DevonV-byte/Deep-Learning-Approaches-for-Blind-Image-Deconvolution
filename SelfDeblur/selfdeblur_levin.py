@@ -1,5 +1,4 @@
 from __future__ import print_function
-import matplotlib.pyplot as plt
 import argparse
 import os
 import numpy as np
@@ -40,7 +39,6 @@ parser.add_argument('--N_kernels', type=int, default=0, help='specific kernel to
 parser.add_argument('--Interm', action='store_true', help='when enabled, only processes images ending with img_x.png')
 parser.add_argument('--Interm_path', type=str, default="img_x.png", help='path to intermediate results')
 opt = parser.parse_args()
-#print(opt)
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark =True
@@ -52,10 +50,6 @@ files_source = glob.glob(os.path.join(opt.data_path, '*.png'))
 files_source.sort()
 save_path = opt.save_path
 os.makedirs(save_path, exist_ok=True)
-
-# Filter out base/groundtruth images (like im1.png, im2.png, etc.)
-# base_pattern = r'im\d+\.png$'  # Matches patterns like im1.png, im2.png without kernel in name
-# files_source = [f for f in files_source if not re.match(base_pattern, os.path.basename(f))]
 
 # Filter images based on N_imgs and N_kernels parameters
 if opt.N_imgs > 0:
@@ -81,10 +75,6 @@ if opt.N_imgs > 0:
 if opt.Interm:
     files_source = [f for f in files_source if os.path.basename(f).endswith(opt.Interm_path)]
 
-
-# print(files_source)
-# print(len(files_source))
-# exit()
 
 # start #image
 for f in files_source:
@@ -116,9 +106,6 @@ for f in files_source:
         opt.kernel_size = [23, 23]
     if imgname.find('kernel8') != -1:
         opt.kernel_size = [23, 23]
-    
-    # for Conv_Mode, kernel_size = 27, 27
-    # opt.kernel_size = [27, 27]
 
     _, imgs = get_image(path_to_image, -1) # load image and convert to np.
     y = np_to_torch(imgs).type(dtype)

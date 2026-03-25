@@ -1,6 +1,5 @@
 
 from __future__ import print_function
-import matplotlib.pyplot as plt
 import argparse
 import os
 import numpy as np
@@ -9,7 +8,6 @@ from networks.fcn import fcn
 import cv2
 import torch
 import torch.optim
-from torch.autograd import Variable
 import glob
 from skimage.io import imread
 from skimage.io import imsave
@@ -28,7 +26,6 @@ parser.add_argument('--data_path', type=str, default="datasets/real", help='path
 parser.add_argument('--save_path', type=str, default="results/real/", help='path to deblurring results')
 parser.add_argument('--save_frequency', type=int, default=100, help='lfrequency to save results')
 opt = parser.parse_args()
-# print(opt)
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
@@ -111,7 +108,6 @@ for f in files_source:
         # input regularization
         net_input = net_input_saved + reg_noise_std * torch.zeros(net_input_saved.shape).type_as(
             net_input_saved.data).normal_()
-        # net_input_kernel = net_input_kernel_saved + reg_noise_std*torch.zeros(net_input_kernel_saved.shape).type_as(net_input_kernel_saved.data).normal_()
 
         # change the learning rate
         scheduler.step(step)
@@ -122,8 +118,6 @@ for f in files_source:
         out_k = net_kernel(net_input_kernel)
 
         out_k_m = out_k.view(-1, 1, opt.kernel_size[0], opt.kernel_size[1])
-
-        # print(out_k_m)
         out_y = nn.functional.conv2d(out_x, out_k_m, padding=0, bias=None)
 
         y_size = out_y.shape
@@ -140,8 +134,6 @@ for f in files_source:
         optimizer.step()
 
         if (step + 1) % opt.save_frequency == 0:
-            # print('Iteration %05d' %(step+1))
-
             save_path = os.path.join(opt.save_path, '%s_x.png' % imgname)
             out_x_np = torch_to_np(out_x)
             out_x_np = out_x_np.squeeze()

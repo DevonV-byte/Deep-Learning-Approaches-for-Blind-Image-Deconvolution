@@ -1,7 +1,6 @@
 
 
 from __future__ import print_function
-import matplotlib.pyplot as plt
 import argparse
 import os
 import numpy as np
@@ -27,7 +26,6 @@ parser.add_argument('--data_path', type=str, default="datasets/lai/uniform_ycbcr
 parser.add_argument('--save_path', type=str, default="results/lai/uniform", help='path to save results')
 parser.add_argument('--save_frequency', type=int, default=100, help='lfrequency to save results')
 opt = parser.parse_args()
-#print(opt)
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark =True
@@ -103,7 +101,6 @@ for f in files_source:
     optimizer = torch.optim.Adam([{'params':net.parameters()},{'params':net_kernel.parameters(),'lr':1e-4}], lr=LR)
     scheduler = MultiStepLR(optimizer, milestones=[2000, 3000, 4000], gamma=0.5)  # learning rates
 
-    #
     net_input_saved = net_input.detach().clone()
     net_input_kernel_saved = net_input_kernel.detach().clone()
 
@@ -112,7 +109,6 @@ for f in files_source:
 
         # input regularization
         net_input = net_input_saved + reg_noise_std*torch.zeros(net_input_saved.shape).type_as(net_input_saved.data).normal_()
-        # net_input_kernel = net_input_kernel_saved + reg_noise_std*torch.zeros(net_input_kernel_saved.shape).type_as(net_input_kernel_saved.data).normal_()
 
         # change the learning rate
         scheduler.step(step)
@@ -123,7 +119,6 @@ for f in files_source:
         out_k = net_kernel(net_input_kernel)
     
         out_k_m = out_k.view(-1,1,opt.kernel_size[0],opt.kernel_size[1])
-        # print(out_k_m)
         out_y = nn.functional.conv2d(out_x, out_k_m, padding=0, bias=None)
 
         if step < 500:
@@ -135,8 +130,6 @@ for f in files_source:
         optimizer.step()
 
         if (step+1) % opt.save_frequency == 0:
-            #print('Iteration %05d' %(step+1))
-
             save_path = os.path.join(opt.save_path, '%s_x.png'%imgname)
             out_x_np = torch_to_np(out_x)
             out_x_np = out_x_np.squeeze()

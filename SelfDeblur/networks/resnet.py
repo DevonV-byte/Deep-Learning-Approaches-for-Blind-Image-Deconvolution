@@ -1,9 +1,5 @@
 import torch
 import torch.nn as nn
-from numpy.random import normal
-from numpy.linalg import svd
-from math import sqrt
-import torch.nn.init
 from .common import *
 
 class ResidualSequential(nn.Sequential):
@@ -12,22 +8,14 @@ class ResidualSequential(nn.Sequential):
 
     def forward(self, x):
         out = super(ResidualSequential, self).forward(x)
-        # print(x.size(), out.size())
         x_ = None
         if out.size(2) != x.size(2) or out.size(3) != x.size(3):
             diff2 = x.size(2) - out.size(2)
             diff3 = x.size(3) - out.size(3)
-            # print(1)
-            x_ = x[:, :, diff2 /2:out.size(2) + diff2 / 2, diff3 / 2:out.size(3) + diff3 / 2]
+            x_ = x[:, :, diff2 // 2:out.size(2) + diff2 // 2, diff3 // 2:out.size(3) + diff3 // 2]
         else:
             x_ = x
         return out + x_
-
-    def eval(self):
-        print(2)
-        for m in self.modules():
-            m.eval()
-        exit()
 
 
 def get_block(num_channels, norm_layer, act_fun):
@@ -53,36 +41,17 @@ class ResNet(nn.Module):
         else:
             s = nn.Sequential
 
-        # stride = 1
-        # First layers
         layers = [
-            # nn.ReplicationPad2d(num_blocks * 2 * stride + 3),
             conv(num_input_channels, num_channels, 3, stride=1, bias=True, pad=pad),
             act(act_fun)
         ]
-        # Residual blocks
-        # layers_residual = []
         for i in range(num_blocks):
             layers += [s(*get_block(num_channels, norm_layer, act_fun))]
-       
+
         layers += [
             nn.Conv2d(num_channels, num_channels, 3, 1, 1),
             norm_layer(num_channels, affine=True)
         ]
-
-        # if need_residual:
-        #     layers += [ResidualSequential(*layers_residual)]
-        # else:
-        #     layers += [Sequential(*layers_residual)]
-
-        # if factor >= 2: 
-        #     # Do upsampling if needed
-        #     layers += [
-        #         nn.Conv2d(num_channels, num_channels *
-        #                   factor ** 2, 3, 1),
-        #         nn.PixelShuffle(factor),
-        #         act(act_fun)
-        #     ]
         layers += [
             conv(num_channels, num_output_channels, 3, 1, bias=True, pad=pad),
             nn.Sigmoid()

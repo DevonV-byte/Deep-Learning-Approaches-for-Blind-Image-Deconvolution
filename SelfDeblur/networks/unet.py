@@ -1,8 +1,6 @@
 import torch.nn as nn
 import torch
-import torch.nn as nn
-import torch.nn.functional as F
-from .common import * 
+from .common import *
 
 class ListModule(nn.Module):
     def __init__(self, *args):
@@ -104,7 +102,6 @@ class UNet(nn.Module):
         if self.more_layers > 0:
             prevs = [down4]
             for kk, d in enumerate(self.more_downs):
-                # print(prevs[-1].size())
                 out = d(prevs[-1])
                 if self.concat_x:
                     out = torch.cat([out,  downs[kk + 5]], 1)
@@ -113,8 +110,8 @@ class UNet(nn.Module):
 
             up_ = self.more_ups[-1](prevs[-1], prevs[-2])
             for idx in range(self.more_layers - 1):
-                l = self.more_ups[self.more - idx - 2]
-                up_= l(up_, prevs[self.more - idx - 2])
+                l = self.more_ups[self.more_layers - idx - 2]
+                up_= l(up_, prevs[self.more_layers - idx - 2])
         else:
             up_= down4
 
@@ -131,7 +128,6 @@ class unetConv2(nn.Module):
     def __init__(self, in_size, out_size, norm_layer, need_bias, pad):
         super(unetConv2, self).__init__()
 
-        print(pad)
         if norm_layer is not None:
             self.conv1= nn.Sequential(conv(in_size, out_size, 3, bias=need_bias, pad=pad),
                                        norm_layer(out_size),
@@ -193,8 +189,3 @@ class unetUp(nn.Module):
 
 
 
-if __name__ =='__main__':
-    print(1)
-
-#    net = UNet()
-#    print(net.forward)

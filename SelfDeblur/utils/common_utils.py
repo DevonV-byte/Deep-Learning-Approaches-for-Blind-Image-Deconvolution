@@ -1,16 +1,10 @@
 import torch
 import torch.nn as nn
 import torchvision
-import sys
 import cv2
 import numpy as np
 from PIL import Image
-import PIL
-import numpy as np
-
-
 import matplotlib.pyplot as plt
-import random
 
 def crop_image(img, d=32):
     '''Make dimensions divisible by `d`'''
@@ -98,7 +92,7 @@ def load(path):
     return img
 
 def get_image(path, imsize=-1):
-    """Load an image and resize to a cpecific size. 
+    """Load an image and resize to a specific size.
 
     Args: 
         path: path to image
@@ -139,7 +133,7 @@ def get_noise(input_depth, method, spatial_size, noise_type='u', var=1./10):
         method: `noise` for fillting tensor with noise; `meshgrid` for np.meshgrid
         spatial_size: spatial size of the tensor to initialize
         noise_type: 'u' for uniform; 'n' for normal
-        var: a factor, a noise will be multiplicated by. Basically it is standard deviation scaler. 
+        var: a factor, a noise will be multiplied by. Basically it is standard deviation scaler.
     """
     if isinstance(spatial_size, int):
         spatial_size = (spatial_size, spatial_size)
@@ -274,7 +268,7 @@ def reverse_pixelshuffle(image, scale, fill=0, fill_image=0, ind=[0, 0]):
         hf = 0
         for hs in range(scale):
             temp = real[ws::scale, hs::scale, :]
-            wc, hc, cc = temp.shape  # get the shpae of the current images
+            wc, hc, cc = temp.shape  # get the shape of the current images
             if fill == 1 and ws == ind[0] and hs == ind[1]:
                 real[ws::scale, hs::scale, :] = fill_image[wf:wf + wc, hf:hf + hc, :]
             else:

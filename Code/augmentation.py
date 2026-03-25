@@ -22,15 +22,13 @@ def perform_augmentation(image_paths, augmentation_rate=1, grayscale=False):
         else:
             img = img.convert('RGB')
         
-        # Convert to numpy array
-        img_array = np.array(img)
-        
         # Apply augmentations
         for _ in range(num_augmentations):
             augmented_image = img.copy()
-            
-            # Randomly apply augmentation techniques
-            for technique in random.sample(techniques, k=len(techniques)):
+
+            # Randomly apply augmentation techniques in shuffled order
+            random.shuffle(techniques)
+            for technique in techniques:
                 if technique == "rotate":
                     angle = random.choice([90, 180, 270])
                     augmented_image = augmented_image.rotate(angle)

@@ -67,7 +67,6 @@ class Downsampler(nn.Module):
             x = self.padding(input)
         else:
             x= input
-        self.x = x
         return self.downsampler_(x)
 
 class Blurconv(nn.Module):
@@ -76,30 +75,8 @@ class Blurconv(nn.Module):
     '''
     def __init__(self, n_planes=1, preserve_size=False):
         super(Blurconv, self).__init__()
-        
-#        self.kernel = kernel
-#        blurconv = nn.Conv2d(n_planes, n_planes, kernel_size=self.kernel.shape, stride=1, padding=0)
-#        blurconvr.weight.data = self.kernel
-#        blurconv.bias.data[:] = 0
         self.n_planes = n_planes
         self.preserve_size = preserve_size
-
-#        kernel_torch = torch.from_numpy(self.kernel)
-#        for i in range(n_planes):
-#            blurconv.weight.data[i, i] = kernel_torch       
-
-#        self.blurconv_ = blurconv
-#
-#        if preserve_size:
-#
-#            if  self.kernel.shape[0] % 2 == 1: 
-#                pad = int((self.kernel.shape[0] - 1) / 2.)
-#            else:
-#                pad = int((self.kernel.shape[0] - factor) / 2.)
-#                
-#            self.padding = nn.ReplicationPad2d(pad)
-#        
-#        self.preserve_size = preserve_size
         
     def forward(self, input, kernel):
         if self.preserve_size:
@@ -129,24 +106,22 @@ class Blurconv2(nn.Module):
         self.k_size = k_size
         self.preserve_size = preserve_size
         self.blurconv = nn.Conv2d(self.n_planes, self.n_planes, kernel_size=k_size, stride=1, padding=0, bias=False)
-#        self.blurconv.weight.data[:] /= self.blurconv.weight.data.sum()
+
     def forward(self, input):
         if self.preserve_size:
-            pad = int((self.k_size - 1.) / 2.) 
+            pad = int((self.k_size - 1.) / 2.)
             padding = nn.ReplicationPad2d(pad)
             x = padding(input)
         else:
             x= input
-        #self.blurconv.weight.data[:] /= self.blurconv.weight.data.sum()
         return self.blurconv(x)
 
 
         
 def get_kernel(factor, kernel_type, phase, kernel_width, support=None, sigma=None):
     assert kernel_type in ['lanczos', 'gauss', 'box']
-    
-    # factor  = float(factor)
-    if phase == 0.5 and kernel_type != 'box': 
+
+    if phase == 0.5 and kernel_type != 'box':
         kernel = np.zeros([kernel_width - 1, kernel_width - 1])
     else:
         kernel = np.zeros([kernel_width, kernel_width])
@@ -161,7 +136,6 @@ def get_kernel(factor, kernel_type, phase, kernel_width, support=None, sigma=Non
         assert phase != 0.5, 'phase 1/2 for gauss not implemented'
         
         center = (kernel_width + 1.)/2.
-        print(center, kernel_width)
         sigma_sq =  sigma * sigma
         
         for i in range(1, kernel.shape[0] + 1):
@@ -203,14 +177,8 @@ def get_kernel(factor, kernel_type, phase, kernel_width, support=None, sigma=Non
         assert False, 'wrong method name'
     
     kernel /= kernel.sum()
-    
+
     return kernel
-
-#a = Downsampler(n_planes=3, factor=2, kernel_type='lanczos2', phase='1', preserve_size=True)
-
-
-
-
 
 
 #################

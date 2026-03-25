@@ -3,11 +3,9 @@
 
 
 from __future__ import print_function
-import matplotlib.pyplot as plt
 import argparse
 import os
 import numpy as np
-import cv2
 import torch
 import torch.optim
 import glob
@@ -28,9 +26,6 @@ parser.add_argument('--data_path', type=str, default="imgs/lai/uniform_ycbcr/", 
 parser.add_argument('--save_path', type=str, default="results/lai/uniform_reproduce/", help='path to save results')
 parser.add_argument('--save_frequency', type=int, default=1, help='lfrequency to save results')
 opt = parser.parse_args()
-#print(opt)
-
-#os.environ['CUDA_VISIBLE_DEVICES'] = '1'
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark =True
@@ -109,7 +104,6 @@ for f in files_source:
 
         # input regularization
         net_input = net_input_saved + reg_noise_std*torch.zeros(net_input_saved.shape).type_as(net_input_saved.data).normal_()
-        # net_input_kernel = net_input_kernel_saved + reg_noise_std*torch.zeros(net_input_kernel_saved.shape).type_as(net_input_kernel_saved.data).normal_()
 
         # change the learning rate
         scheduler.step(step)
@@ -120,7 +114,6 @@ for f in files_source:
         out_k = net_kernel(net_input_kernel)
     
         out_k_m = out_k.view(-1,1,opt.kernel_size[0],opt.kernel_size[1])
-        # print(out_k_m)
         out_y = nn.functional.conv2d(out_x, out_k_m, padding=0, bias=None)
 
         if step < 0:
@@ -131,14 +124,10 @@ for f in files_source:
         optimizer.step()
 
         if (step+1) % opt.save_frequency == 0:
-            #print('Iteration %05d' %(step+1))
-
             save_path = os.path.join(opt.save_path, '%s_x.png'%imgname)
             out_x_np = torch_to_np(out_x)
             out_x_np = out_x_np.squeeze()
             out_x_np = out_x_np[padh//2:padh//2+img_size[1], padw//2:padw//2+img_size[2]]
-            #out_x_np = np.uint8(out_x_np*255)
-            #cv2.imwrite(save_path, out_x_np)
             imsave(save_path, out_x_np)
 
             save_path = os.path.join(opt.save_path, '%s_k.png'%imgname)
@@ -146,6 +135,3 @@ for f in files_source:
             out_k_np = out_k_np.squeeze()
             out_k_np /= np.max(out_k_np)
             imsave(save_path, out_k_np)
-
-            #torch.save(net, os.path.join(opt.save_path, "%s_xnet.pth" % imgname))
-            #torch.save(net_kernel, os.path.join(opt.save_path, "%s_knet.pth" % imgname))

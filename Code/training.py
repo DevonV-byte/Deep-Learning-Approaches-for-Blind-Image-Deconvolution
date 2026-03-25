@@ -220,93 +220,6 @@ LOSS_FUNCTIONS = {
     'mse_mnc': kernel_mse_mnc_loss
 }
 
-def debug_kernel_mse_with_real(real_kernel):
-    """
-    Debug function to manually compute MSE between a real kernel from the dataset
-    and a uniform kernel to verify loss calculation.
-    """
-    # Use the real kernel from the dataset
-    gt_kernel = real_kernel
-    
-    # Create a uniform kernel with ~0.001 values
-    uniform_kernel = np.ones((32, 32)) / (32 * 32)  # Each value is ~0.001
-    
-    # Convert to tensors (matching the format used in kernel_mse_loss)
-    gt_tensor = tf.convert_to_tensor(gt_kernel.flatten()[np.newaxis, :], dtype=tf.float32)
-    uniform_tensor = tf.convert_to_tensor(uniform_kernel.flatten()[np.newaxis, :], dtype=tf.float32)
-    
-    # Calculate MSE using your existing function
-    mse_tf = kernel_mse_loss(gt_tensor, uniform_tensor).numpy()
-    
-    # Calculate MSE manually for verification
-    mse_manual = np.mean((gt_kernel - uniform_kernel) ** 2)
-    
-    # Print results
-    print("\n----- KERNEL MSE DEBUG -----")
-    print(f"Ground truth kernel sum: {np.sum(gt_kernel)}")
-    print(f"Uniform kernel sum: {np.sum(uniform_kernel)}")
-    print(f"Ground truth kernel max value: {np.max(gt_kernel)}")
-    print(f"Ground truth kernel min value: {np.min(gt_kernel)}")
-    print(f"Uniform kernel value: {uniform_kernel[0, 0]}")
-    print(f"MSE calculated by TensorFlow function: {mse_tf}")
-    print(f"MSE calculated manually: {mse_manual}")
-    
-    # Verify if they match
-    if np.isclose(mse_tf, mse_manual):
-        print("✅ MSE calculations match!")
-    else:
-        print("❌ MSE calculations don't match!")
-        print(f"Difference: {abs(mse_tf - mse_manual)}")
-    print("-----------------------------\n")
-
-def debug_model_gradients(model, dataset):
-    """
-    Debug function to check gradient magnitudes during training.
-    This helps verify that the model is learning even with small loss values.
-    """
-    print("\n----- GRADIENT MAGNITUDE DEBUG -----")
-    
-    # Get a batch of data
-    for x_batch, y_batch in dataset.take(1):
-        break
-    
-    # Create a gradient tape to track operations for automatic differentiation
-    with tf.GradientTape() as tape:
-        # Forward pass
-        y_pred = model(x_batch, training=True)
-        # Calculate loss
-        loss = kernel_mse_loss(y_batch, y_pred)
-    
-    # Calculate gradients
-    gradients = tape.gradient(loss, model.trainable_variables)
-    
-    # Print gradient statistics
-    print(f"Loss value: {loss.numpy()}")
-    print("\nGradient statistics by layer:")
-    
-    total_gradient_norm = 0
-    for i, (grad, var) in enumerate(zip(gradients, model.trainable_variables)):
-        if grad is not None:
-            grad_norm = tf.norm(grad).numpy()
-            total_gradient_norm += grad_norm**2
-            print(f"Layer {i} ({var.name}):")
-            print(f"  - Shape: {var.shape}")
-            print(f"  - Gradient norm: {grad_norm:.8f}")
-            print(f"  - Gradient min/max: {tf.reduce_min(grad).numpy():.8f}/{tf.reduce_max(grad).numpy():.8f}")
-        else:
-            print(f"Layer {i} ({var.name}): No gradient")
-    
-    total_gradient_norm = np.sqrt(total_gradient_norm)
-    print(f"\nTotal gradient norm: {total_gradient_norm:.8f}")
-    
-    # Check for vanishing gradients
-    if total_gradient_norm < 1e-7:
-        print("⚠️ WARNING: Gradients may be vanishing! Consider adjusting your loss function or model architecture.")
-    else:
-        print("✅ Gradients appear to be non-vanishing.")
-    
-    print("------------------------------------\n")
-
 # ------------------------------- Model Code --------------------------------- #
 
 @tf.function(reduce_retracing=True)
@@ -353,10 +266,10 @@ def create_lightweight_model(input_shape, kernel_size=32*32):
         tf.keras.layers.Dense(kernel_size, activation=None)
     ])
 
-def train_neural_network(X, kernels, strategy, model=None, epochs=5, learning_rate=0.001, batch_size=16, debug_gradients=False, loss_function='mse'):
+def train_neural_network(X, kernels, strategy, model=None, epochs=5, learning_rate=0.001, batch_size=16, loss_function='mse'):
     """
     Train a neural network to predict kernels from convolved images.
-    
+
     Args:
         X: List of convolved images
         kernels: List of kernels used for convolution (or list of tuples (kernel, kernel_type))
@@ -365,7 +278,6 @@ def train_neural_network(X, kernels, strategy, model=None, epochs=5, learning_ra
         epochs: Number of training epochs
         learning_rate: Learning rate for the optimizer
         batch_size: Batch size for training
-        debug_gradients: Whether to debug gradients
         loss_function: Name of the loss function to use (must be a key in LOSS_FUNCTIONS)
         
     Returns:

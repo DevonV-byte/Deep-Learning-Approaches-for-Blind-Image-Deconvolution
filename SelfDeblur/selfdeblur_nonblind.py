@@ -1,6 +1,5 @@
 
 from __future__ import print_function
-import matplotlib.pyplot as plt
 import argparse
 import os
 import numpy as np
@@ -27,7 +26,6 @@ parser.add_argument('--data_path', type=str, default="results/lai/uniform/nonbli
 parser.add_argument('--save_path', type=str, default="results/lai/uniform/nonblind/blurry/results", help='path to save results')
 parser.add_argument('--save_frequency', type=int, default=100, help='lfrequency to save results')
 opt = parser.parse_args()
-#print(opt)
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark =True
@@ -120,7 +118,6 @@ for f in files_source:
         # get the network output
         out_x = net(net_input)
 
-        # print(out_k_m)
         out_y = nn.functional.conv2d(out_x, out_k, padding=0, bias=None)
 
         total_loss = 1 - ssim(out_y, y)  
@@ -128,8 +125,6 @@ for f in files_source:
         optimizer.step()
 
         if (step+1) % opt.save_frequency == 0:
-            #print('Iteration %05d' %(step+1))
-
             save_path = os.path.join(opt.save_path, '%s_x.png'%imgname)
             out_x_np = torch_to_np(out_x)
             out_x_np = out_x_np.squeeze()
