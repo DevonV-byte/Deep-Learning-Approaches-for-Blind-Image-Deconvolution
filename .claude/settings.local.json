@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(find '/c/Users/devon/Projects/Deep Learning Approaches for Blind Image Deconvolution' -type f -name *.bat)",
+      "Bash(xargs ls:*)",
+      "Bash(ls -lh \"/c/Users/devon/Projects/Deep Learning Approaches for Blind Image Deconvolution\"/SelfDeblur/*.bat)",
+      "Bash(wc -l /c/Users/devon/Projects/Deep Learning Approaches for Blind Image Deconvolution/SelfDeblur/*.py)"
+    ]
+  }
+}

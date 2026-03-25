@@ -1,0 +1,27 @@
+visualization/
+Kernels_Npy_optim/
+/Code/Model_Tests
+/Kernels and Loss Metrics/kernel_comparison_results
+/Kernels and Loss Metrics/metric_verification_results
+/Kernels and Loss Metrics/__pycache__
+/Code/Conv_Mode
+Code/Conv_Mode.zip
+*.jpg
+*.jpeg
+*.png
+*.gif
+*.pth
+*.pyc
+*.npy
+*.zip
+
+# Large binaries / thesis document
+*.pdf
+*.tif
+*.docx
+
+# Internal tooling
+CLAUDE.md
+
+# Python cache (catch-all)
+__pycache__/
