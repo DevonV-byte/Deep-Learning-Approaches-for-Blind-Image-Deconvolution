@@ -88,6 +88,12 @@ Two model architectures were evaluated:
 
 ## Key Results
 
+| | **SelfDeblur** | **Supervised Pipeline** |
+|---|---|---|
+| **Key Findings** | Recovers diverse kernels (incl. PSF) with high accuracy (MNC ≈ 0.90–0.95). Robust to different random initialisations — consistent kernels across runs. | **Convolutional model (A)** achieves MNC ≈ 0.95–0.98 on synthetic PSFs. Fully-connected model (B) collapses to trivial kernels, showing need for spatial bias. |
+| **Strengths** | **Truly blind** — no training data required. Implicit deep priors (U-Net for image, Softmax FCN for kernel) prevent trivial solutions. | Once trained, **predicts PSFs in milliseconds** (suitable for large datasets). Highlights how convolutional inductive bias (locality & weight sharing) resolves the (image, kernel) ambiguity. |
+| **Limitations** | Iterative **per-image optimisation is slow** (minutes per frame). High memory footprint — U-Net image generator and FCN kernel generator both require large tensor allocations. | **Depends on representative training data**, fails on out-of-distribution PSFs. Sensitive to loss design — requires MNC-based term to avoid mode collapse. |
+
 ### SelfDeblur — Loss Function Ablation (Levin Dataset)
 
 | Loss | PSNR (dB) | SSIM | MNC |
@@ -117,8 +123,6 @@ Two model architectures were evaluated:
 |----------|-----|
 | Analytic PSFs (A-PSF) | ~0.98 |
 | Empirical PSFs (E-PSF) | ~0.95 |
-
-Model B (pure FC) collapsed to predicting the mean kernel regardless of input — confirming that convolutional architecture with proper inductive bias is essential.
 
 ---
 
